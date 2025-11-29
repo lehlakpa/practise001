@@ -1,0 +1,17 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: black;
+}
+body{
+    background-color:greenyellow;
+
+}
+.hey{
+    justify-items: center;
+    align-items: center;
+    text-align: center;
+justify-content: space-between;
+    font: 20px Arial, Helvetica, sans-serif;
+}
