@@ -1,12 +1,11 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const adminSchema = new Schema({
     fullname: {
         required: [true, "Fullname is required"],
-        type: String,
-        required: true
+        type: String
     },
     username: {
         type: String,

@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { adminregister, adminLogin, adminLogout } from "../Controllers/userCrontroller.js";
+import { adminLogin, adminregister, adminLogout } from "../Controllers/userCrontroller.js";
 
 const router = Router();
-router.route("/login").post(adminLogin);
+
 router.route("/register").post(adminregister);
-router.route("/logout").post(adminLogout); //logout route
+router.route("/login").post(adminLogin);
+
+// This would be a protected route in a real app
+router.route("/logout").post(adminLogout);
 
 export default router;

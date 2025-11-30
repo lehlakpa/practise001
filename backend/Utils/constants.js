@@ -1,1 +1,1 @@
-export const MONGO_NAME = "leh lakpa DB";
+export const MONGO_NAME = "practise001";

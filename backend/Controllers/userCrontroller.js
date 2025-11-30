@@ -3,6 +3,20 @@ import ApiResponse from "../Utils/ApiResponse.js";
 import apiError from "../Utils/apiError.js";
 import { Admin } from "../Models/adminmodel.js";
 
+const generatetokens = async (user) => {
+  try {
+     const accessToken = user.generateAccessToken();
+     const refreshToken = user.generateRefreshToken();
+
+     user.refreshToken = refreshToken;
+     await user.save({ validateBeforeSave: false });
+     return { accessToken, refreshToken };
+  } catch (error) {
+    
+    throw new apiError(500, "Token generation failed");
+  }
+};
+
 const adminregister = asyncHandler(async (req, res) => {
     //register for admin 
     const { fullname, username, password } = req.body;
@@ -22,12 +36,14 @@ const adminregister = asyncHandler(async (req, res) => {
         password,
     });
 
-    // Do not send password back in the response
-    const createdAdmin = await Admin.findById(admin1._id).select("-password");
+    // Convert the mongoose document to a plain object to manipulate it
+    const createdAdmin = admin1.toObject();
+    delete createdAdmin.password;
+    delete createdAdmin.refreshToken;
 
-    return res.status(201).json(
-        new ApiResponse(201, "Admin registered successfully", createdAdmin)
-    );
+    return res
+        .status(201)
+        .json(new ApiResponse(201, "Admin registered successfully", createdAdmin));
 });
 
 const adminLogin = asyncHandler(async (req, res) => {
@@ -45,39 +61,40 @@ const adminLogin = asyncHandler(async (req, res) => {
     if (!isPasswordValid) {
         throw new apiError(401, "Invalid username or password");
     }
-    const accessToken = admin.generateAccessToken();
-    const refreshToken = admin.generateRefreshToken();
 
-    admin.refreshToken = refreshToken;
-    await admin.save({ validateBeforeSave: false });
+    const{accessToken,refreshToken}= await generatetokens(admin);
 
-    const loggedInAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
+    const loggedInAdmin = admin.toObject();
+    delete loggedInAdmin.password;
+    delete loggedInAdmin.refreshToken;
 
-    return res.status(200).json(
-        new ApiResponse(200, "Admin logged in successfully", {
-            admin: loggedInAdmin,
-            accessToken,
-            refreshToken,
-        })
-    );
+    const options = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict"
+    };
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+            new ApiResponse(200, "Admin logged in successfully", {
+                admin: loggedInAdmin
+            })
+        );
 });
 const adminLogout = asyncHandler(async (req, res) => {
     // logout for admin
-    await Admin.findByIdAndUpdate(req.admin._id,
-        {$set: {refreshToken: undefined ,
-            accessToken: undefined
-        }},
-        {new:true}
-    );
     const option={
-        httOnly:true,
+        httpOnly:true,
         sameSite:"strict",
         secure:true,
     }
 
     return res.status(200)
-    .clearcookie("refreshToken",option)
-    .clearcookie("accessToken",option)
+    .clearCookie("refreshToken",option)
+    .clearCookie("accessToken",option)
     .json(
         new ApiResponse(200,"Admin logged out successfully",null)
     );
