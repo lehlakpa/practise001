@@ -31,7 +31,7 @@ const adminSchema = new Schema({
 
 );
 adminSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) {
+    if (!this.isNew && !this.isModified("password")) {
         return next();
     }
     this.password = await bcrypt.hash(this.password, 10);

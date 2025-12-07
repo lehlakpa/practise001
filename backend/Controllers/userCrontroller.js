@@ -4,18 +4,17 @@ import apiError from "../Utils/apiError.js";
 import { Admin } from "../Models/adminmodel.js";
 import jwt from "jsonwebtoken";
 
-const generatetokens = async (user) => {
-  try {
-     const accessToken = user.generateAccessToken();
-     const refreshToken = user.generateRefreshToken();
-
-     user.refreshToken = refreshToken;
-     await user.save({ validateBeforeSave: false });
-     return { accessToken, refreshToken };
-  } catch (error) {
-    
-    throw new apiError(500, "Token generation failed");
+const generatetokens = async (adminId) => {
+  const user = await Admin.findById(adminId);
+  if (!user) {
+    throw new apiError(404, "User not found");
   }
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
+  return { accessToken, refreshToken };
 };
 
 const adminregister = asyncHandler(async (req, res) => {
@@ -50,24 +49,22 @@ const adminregister = asyncHandler(async (req, res) => {
 const adminLogin = asyncHandler(async (req, res) => {
     // login for admin
     const { username, password } = req.body;
-    if ([username, password].some((field) => field?.trim() === "")) {
-        throw new apiError(400, "All fields are required");
-    }
 
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
+      if (!username) {
+        throw new apiError(400, "Username is required");
+    }
+    const admincheck= await Admin.findOne({username});
+    if(!admincheck){
         throw new apiError(401, "Invalid username or password");
     }
-    const isPasswordValid = await admin.comparePassword(password);
+    const isPasswordValid = await admincheck.comparePassword(password);
+
     if (!isPasswordValid) {
         throw new apiError(401, "Invalid username or password");
     }
 
-    const {accessToken,refreshToken} = await generatetokens(admin);
-
-    const loggedInAdmin = admin.toObject();
-    delete loggedInAdmin.password;
-    delete loggedInAdmin.refreshToken;
+    const {accessToken,refreshToken} = await generatetokens(admincheck._id);
+    const okuser= await Admin.findById(admincheck._id).select("-password -refreshToken");
 
     const options = {
         httpOnly: true,
@@ -81,28 +78,32 @@ const adminLogin = asyncHandler(async (req, res) => {
         .cookie("refreshToken", refreshToken, options)
         .json(
             new ApiResponse(200, "Admin logged in successfully", {
-                admin: loggedInAdmin
+                user: okuser,
+                accessToken,
+                refreshToken,
             })
         );
 });
+
+// admin section for logout
 const adminLogout = asyncHandler(async (req, res) => {
-    // logout for admin
-    const options={
-        httpOnly:true,
-        sameSite:"strict",
-        secure:true,
-    }
-
-    return res.status(200)
-    .clearCookie("refreshToken",options)
-    .clearCookie("accessToken",options)
-    .json(
-        new ApiResponse(200,"Admin logged out successfully",null)
+   await Admin.findByIdAndUpdate(
+        req.user._id,
+        { $set: { accessToken: undefined, refreshToken: undefined } },
+        { new: true }
     );
-    }
 
-)
+    const options = {
+        httpOnly: true, // only secure in prod
+        sameSite: "strict",
+    };
 
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, null, "User logged out successfully"));
+});
 
 const refreshaccesstoken = asyncHandler(async (req, res) => {
     const incomingrefreshToken = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "");
