@@ -4,6 +4,7 @@ import apiError from "../Utils/apiError.js";
 import { Admin } from "../Models/adminmodel.js";
 import jwt from "jsonwebtoken";
 import { uploadImage } from "../Utils/cloudinaryupload.js";
+import { UploadImages } from "../Models/uploadmodel.js";
 
 const generatetokens = async (adminId) => {
     const user = await Admin.findById(adminId);
@@ -19,24 +20,29 @@ const generatetokens = async (adminId) => {
 };
 
 const adminregister = asyncHandler(async (req, res) => {
-    //register for admin 
     const { fullname, username, password } = req.body;
 
-    if ([fullname, username, password].some((field) => field?.trim() === "")) {
+    // Validate required fields
+    if ([fullname, username, password].some(field => !field || field.trim() === "")) {
         throw new apiError(400, "All fields are required");
     }
 
+    // Check if username already exists
     const existingUser = await Admin.findOne({ username });
     if (existingUser) {
         throw new apiError(400, "Username already exists");
     }
 
+    // Create admin
     const admin1 = await Admin.create({
         fullname,
         username,
         password,
     });
-    const createdAdmin = await Admin.findById(admin1._id).select("-password -refreshToken");
+
+    // Fetch created admin without sensitive fields
+    const createdAdmin = await Admin.findById(admin1._id)
+        .select("-password -refreshToken");
 
     return res
         .status(201)
@@ -142,32 +148,48 @@ const adminChangepassword = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, "Password changed successfully"));
 });
 
-
-
 //admin upload sections 
 const adminupload = asyncHandler(async (req, res) => {
     const { title, description, price } = req.body;
 
-    if ([title, description, price].some((field) => !field || field.trim() === "")) {
+    // Validate required fields
+    if ([title, description].some((field) => !field || field.trim() === "")) {
         throw new apiError(400, "All fields are required");
-
     }
 
+    if (price === undefined || price === null) {
+        throw new apiError(400, "Price is required");
+    }
+
+    // Validate images
     if (!req.files || !req.files.images || req.files.images.length === 0) {
         throw new apiError(400, "Image is required");
     }
 
+    // Upload images to Cloudinary
     const uploadedImages = await Promise.all(
-        req.files.images.map((file) => uploadImage(file.path))       if (uploadedImages.some(image => !image)) {
-            throw new apiError(500, "Failed to upload one or more images to Cloudinary");
-        }
+        req.files.images.map((file) => uploadImage(file.path))
+    );
 
-    const adminuploads = await FlashSale.create({
+    if (uploadedImages.some((image) => !image)) {
+        throw new apiError(500, "Failed to upload one or more images to Cloudinary");
+    }
+
+    const adminuploads = await UploadImages.create({
         title,
         description,
-        price, images: uploadedImages.map((img) => ({ url: img.secure_url, public_id: img.public_id, })),
+        price,
+        images: uploadedImages.map((img) => ({
+            url: img.secure_url,
+            public_id: img.public_id,
+        })),
     });
-    return res.status(201).json(new ApiResponse(201, "Flash Sale created successfully", adminuploads));
+
+
+    return res
+        .status(201)
+        .json(new ApiResponse(201, "Flash Sale created successfully", adminuploads));
 });
 
-export { adminLogin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken };
+
+export { adminLogin, adminupload, adminChangepassword, adminregister, adminLogout, refreshaccesstoken };
