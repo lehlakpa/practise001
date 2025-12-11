@@ -7,28 +7,28 @@ export default function BannerCarousel() {
             title: "Fresh Organic Vegetables",
             subtitle: "Healthy choices for your daily meals",
             color: "bg-white",
-            image: "https://images.unsplash.com/photo-1506806732259-39c2d0268443?w=800",
+            image: "https://thumbs.dreamstime.com/b/effective-communication-concept-flat-vector-illustration-boy-woman-exchange-ideas-fostering-understanding-clarity-307120965.jpg",
         },
         {
             id: 2,
             title: "Refreshing Beverages",
             subtitle: "Cool drinks to boost your energy",
             color: "bg-white",
-            image: "https://images.unsplash.com/photo-1509228627159-6452a56b93aa?w=800",
+            image: "https://www.shutterstock.com/image-vector/people-communicating-through-mobile-phones-600nw-2665929121.jpg",
         },
         {
             id: 3,
             title: "Tropical Fruits Collection",
             subtitle: "Handpicked fresh fruits every day",
             color: "bg-white",
-            image: "https://images.unsplash.com/photo-1576402187876-4312a3bb9a33?w=800",
+            image: "https://www.shutterstock.com/image-vector/people-communicating-through-mobile-phones-600nw-2665929121.jpg",
         },
         {
             id: 4,
             title: "Snacks & Sweets",
             subtitle: "Treat yourself with tasty delights",
             color: "bg-white",
-            image: "https://images.unsplash.com/photo-1603052874987-4adfd0f9b6d3?w=800",
+            image: "https://img.freepik.com/free-vector/open-mind-psychotherapy-composition-with-discussion-symbols-flat-vector-illustration_1284-78150.jpg",
         },
     ];
 
@@ -57,7 +57,7 @@ export default function BannerCarousel() {
             {/* Banner container */}
             <div
                 ref={containerRef}
-                className="flex overflow-x-auto scrollbar-hide snap-x snap-mandatory gap-4 w-full"
+                className="flex overflow-x-hidden border-2 border-black rounded-t-md rounded-b-3xl snap-x snap-mandatory gap-4 w-full"
             >
                 {banners.map((banner) => (
                     <div
