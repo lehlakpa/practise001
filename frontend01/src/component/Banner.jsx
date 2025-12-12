@@ -14,14 +14,14 @@ export default function BannerCarousel() {
             title: "Refreshing Beverages",
             subtitle: "Cool drinks to boost your energy",
             color: "bg-white",
-            image: "https://www.shutterstock.com/image-vector/people-communicating-through-mobile-phones-600nw-2665929121.jpg",
+            image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSHpu06q28tvi2WkAT13PZqtEbhAh-Bd1JFsQ&s",
         },
         {
             id: 3,
             title: "Tropical Fruits Collection",
             subtitle: "Handpicked fresh fruits every day",
             color: "bg-white",
-            image: "https://www.shutterstock.com/image-vector/people-communicating-through-mobile-phones-600nw-2665929121.jpg",
+            image: "https://tripwiremagazine.com/wp-content/uploads/2016/10/adobe-illustrator-catoon-tutorials_thumb.jpg",
         },
         {
             id: 4,
