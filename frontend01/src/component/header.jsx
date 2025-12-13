@@ -12,7 +12,7 @@ export default function Header() {
     `;
 
   return (
-    <header className="w-full bg-white shadow-md py-3 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-50">
+    <header className="w-full static bg-white shadow-md py-3 px-4 sm:px-6 flex items-center justify-between top-0 z-50">
 
       {/* Logo */}
       <div className="flex flex-col leading-tight">
