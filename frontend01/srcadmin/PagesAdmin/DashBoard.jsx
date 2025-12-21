@@ -5,13 +5,13 @@ import OrdersTable from "../ComponentAdmin/OrdersTable";
 export default function AdminDashboard() {
   return (
     <div className="flex min-h-screen bg-gray-100">
-      
+
       {/* Sidebar (hidden on mobile inside component) */}
       <AdminSidebar />
 
       {/* Main Content */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 overflow-x-hidden">
-        
+
         {/* Page Title */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>

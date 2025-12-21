@@ -8,6 +8,10 @@ import SubscriptionPackages from "./pages/TvPackages";
 import Details from "./pages/Details";
 import AdminDashboard from "../srcadmin/PagesAdmin/DashBoard";
 import ThankYou from "./pages/ThankYou";
+import Products from "../srcadmin/PagesAdmin/AdminProducts";
+import Customers from "../srcadmin/PagesAdmin/AdminCustomers";
+import Orders from "../srcadmin/PagesAdmin/AdminOrders";
+import Settings from "../srcadmin/PagesAdmin/AdminSetting";
 function App() {
   return (
     <BrowserRouter>
@@ -21,6 +25,10 @@ function App() {
         <Route path="order" element={<Details />} />
         <Route path="Dashboard" element={<AdminDashboard />} />
         <Route path="/thankyou" element={<ThankYou />} /> 
+        <Route path="customers" element={<Customers />} />
+        <Route path="products" element={<Products />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="settings" element={<Settings />} />
 
       </Routes>
     </BrowserRouter>

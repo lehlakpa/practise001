@@ -9,9 +9,12 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+
 
   return (
     <aside
@@ -42,14 +45,14 @@ export default function AdminSidebar() {
         )}
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-2 p-3">
-        <SidebarItem icon={<LayoutDashboard />} label="Dashboard" collapsed={collapsed} />
-        <SidebarItem icon={<Package />} label="Products" collapsed={collapsed} />
-        <SidebarItem icon={<ShoppingCart />} label="Orders" collapsed={collapsed} />
-        <SidebarItem icon={<Users />} label="Customers" collapsed={collapsed} />
-        <SidebarItem icon={<Settings />} label="Settings" collapsed={collapsed} />
+        <SidebarItem icon={<LayoutDashboard />} label="Dashboard" collapsed={collapsed} onClick={() => navigate("/")} />
+        <SidebarItem icon={<Package />} label="Products" collapsed={collapsed} onClick={() => navigate("/products")} />
+        <SidebarItem icon={<ShoppingCart />} label="Orders" collapsed={collapsed} onClick={() => navigate("/orders")} />
+        <SidebarItem icon={<Users />} label="Customers" collapsed={collapsed} onClick={() => navigate("/customers")} />
+        <SidebarItem icon={<Settings />} label="Settings" collapsed={collapsed} onClick={() => navigate("/settings")} />
       </nav>
+
 
       {/* Footer */}
       {!collapsed && (
@@ -61,9 +64,12 @@ export default function AdminSidebar() {
   );
 }
 
-function SidebarItem({ icon, label, collapsed }) {
+function SidebarItem({ icon, label, collapsed, onClick }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition">
+    <div
+      onClick={onClick}
+      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition"
+    >
       {icon}
       {!collapsed && <span>{label}</span>}
     </div>
