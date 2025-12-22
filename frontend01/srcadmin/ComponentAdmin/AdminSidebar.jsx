@@ -9,12 +9,20 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Get current path
 
+  const menuItems = [
+    { icon: <LayoutDashboard />, label: "Dashboard", path: "/dashboard" },
+    { icon: <Package />, label: "Products", path: "/products" },
+    { icon: <ShoppingCart />, label: "Orders", path: "/orders" },
+    { icon: <Users />, label: "Customers", path: "/customers" },
+    { icon: <Settings />, label: "Settings", path: "/settings" },
+  ];
 
   return (
     <aside
@@ -25,7 +33,7 @@ export default function AdminSidebar() {
         flex flex-col
       `}
     >
-      {/* Top Toggle Only */}
+      {/* Top Toggle */}
       <div className="flex items-center justify-end p-4 border-b border-white/10">
         <button onClick={() => setCollapsed(!collapsed)}>
           {collapsed ? <ChevronRight /> : <ChevronLeft />}
@@ -45,14 +53,19 @@ export default function AdminSidebar() {
         )}
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 space-y-2 p-3">
-        <SidebarItem icon={<LayoutDashboard />} label="Dashboard" collapsed={collapsed} onClick={() => navigate("/")} />
-        <SidebarItem icon={<Package />} label="Products" collapsed={collapsed} onClick={() => navigate("/products")} />
-        <SidebarItem icon={<ShoppingCart />} label="Orders" collapsed={collapsed} onClick={() => navigate("/orders")} />
-        <SidebarItem icon={<Users />} label="Customers" collapsed={collapsed} onClick={() => navigate("/customers")} />
-        <SidebarItem icon={<Settings />} label="Settings" collapsed={collapsed} onClick={() => navigate("/settings")} />
+        {menuItems.map((item) => (
+          <SidebarItem
+            key={item.label}
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
       </nav>
-
 
       {/* Footer */}
       {!collapsed && (
@@ -64,11 +77,14 @@ export default function AdminSidebar() {
   );
 }
 
-function SidebarItem({ icon, label, collapsed, onClick }) {
+function SidebarItem({ icon, label, collapsed, active, onClick }) {
   return (
     <div
       onClick={onClick}
-      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition"
+      className={`
+        flex items-center gap-3 p-3 rounded-lg cursor-pointer transition
+        ${active ? "bg-gray-700 font-semibold" : "hover:bg-white/10"}
+      `}
     >
       {icon}
       {!collapsed && <span>{label}</span>}
