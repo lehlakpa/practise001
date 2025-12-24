@@ -5,6 +5,7 @@ import { Admin } from "../Models/adminmodel.js";
 import jwt from "jsonwebtoken";
 import { uploadImage } from "../Utils/cloudinaryupload.js";
 import { UploadImages } from "../Models/uploadmodel.js";
+import Booking from "../Models/bokingmodel.js";
 
 const generatetokens = async (adminId) => {
     const user = await Admin.findById(adminId);
@@ -48,6 +49,115 @@ const adminregister = asyncHandler(async (req, res) => {
         .status(201)
         .json(new ApiResponse(201, "Admin registered successfully", createdAdmin));
 });
+const getAdmin = asyncHandler(async (req, res) => {
+  // Get admin details
+  const admin = await Admin.findById(req.user._id).select(
+    "-password -refreshToken"
+  );
+
+  if (!admin) {
+    throw new ApiError(404, "Admin not found");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, admin, "Admin fetched successfully"));
+});
+
+
+// Booking schema for order
+const Booking1 = asyncHandler(async (req, res) => {
+    try {
+        const { plan, connectionType, fullName, phone, municipality, tole, paymentMethod } = req.body;
+        // Validate required fields
+        if ([plan, connectionType, fullName, phone, municipality].some(field => !field || field.trim() === "")) {
+            throw new apiError(400, "All required fields must be filled");
+        }
+        const newBooking = await Booking.create({
+            plan,
+            connectionType,
+            fullName,
+            phone,
+            municipality,
+            tole,
+            paymentMethod,
+        });
+        return res.status(201).json(new ApiResponse(201, "Booking created successfully", newBooking));
+
+    } catch (error) {
+        console.error("Create order failed", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+const getBokings = asyncHandler(async (req, res) => {
+    try {
+        const bookings = await Booking.find().sort({ createdAt: -1 });
+        return res.status(200).json(new ApiResponse(200, "Bookings fetched successfully", bookings));
+    } catch (error) {
+        console.error("Get order errors", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+const getBookingById = asyncHandler(async (req, res) => {
+    try {
+        const bookingId = req.params.id;
+        const booking = await Booking.findById(bookingId);
+        if (!booking) {
+            throw new apiError(404, "Booking not found");
+        }
+        return res.status(200).json(new ApiResponse(200, "Booking fetched successfully", booking));
+    } catch (error) {
+        console.error("Get order by ID failed", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+const updateBooking = asyncHandler(async (req, res) => {
+    try {
+        const status = req.body.status;
+        const allowedStatus = [
+            "Pending",
+            "Confirmed",
+            "Installed",
+            "Cancelled",
+        ];
+        if (!allowedStatus.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid order status",
+            });
+        }
+        const book = await Booking.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+        if (!book) {
+            throw new apiError(404, "Booking not found");
+        }
+        return res.status(200).json(new ApiResponse(200, "Booking updated successfully", book));
+    } catch (error) {
+        console.error("Update booking failed", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+const deleteBooking = asyncHandler(async (req, res) => {
+    try {
+        const booking = await Booking.findByIdAndDelete(req.params.id);
+        if (!booking) {
+            throw new apiError(404, "Booking not found");
+        }
+        return res.status(200).json(new ApiResponse(200, "Booking deleted successfully"));
+    } catch (error) {
+        console.error("Delete booking failed", error);
+        return res.status(500).json(new ApiResponse(500, "Internal Server Error"));
+    }
+});
+
+
 
 const adminLogin = asyncHandler(async (req, res) => {
     // login for admin
@@ -192,4 +302,4 @@ const adminupload = asyncHandler(async (req, res) => {
 });
 
 
-export { adminLogin, adminupload, adminChangepassword, adminregister, adminLogout, refreshaccesstoken };
+export { adminLogin, adminupload,getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBokings, getBookingById, updateBooking, deleteBooking, Booking1 };

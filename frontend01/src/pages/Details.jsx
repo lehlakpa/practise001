@@ -190,14 +190,6 @@ const OrderForm = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <input
-                  name="district"
-                  placeholder="District *"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-4 py-2"
-                />
-
-                <input
                   name="municipality"
                   placeholder="Municipality *"
                   value={formData.municipality}
