@@ -2,6 +2,7 @@ import { Router } from "express";
 import { adminLogin, adminregister, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin } from "../Controllers/userCrontroller.js";
 import { authMiddleware } from "../Middleware/authmiddleware.js";
 import { refreshaccesstoken } from "../Controllers/userCrontroller.js";
+import { upload } from "../Middleware/multer.middleware.js";
 
 const router = Router();
 
@@ -12,7 +13,15 @@ router.route("/getuser").get(authMiddleware, getAdmin);
 router.route("/logout").post(authMiddleware, adminLogout);
 router.route("/refresh-token").post(refreshaccesstoken);
 router.route("/change-password").post(authMiddleware, adminChangepassword);
-router.route("/upload").post(authMiddleware, adminupload);
+router.route("/upload").post(
+    upload.fields([
+        {
+            name: "images",
+            maxCount: 5
+        }
+    ]),
+    authMiddleware,adminupload
+);
 
 router.route("/bookings").post(createBooking);
 router.route("/getbookings").get(getBookings);

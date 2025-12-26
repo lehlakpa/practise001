@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 
 const packagesData = [
@@ -32,6 +33,7 @@ const packagesData = [
 export default function InternetPackages() {
   const [search, setSearch] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const navigate = useNavigate();
 
   // Network detection
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function InternetPackages() {
           </h1>
 
           <button
+            onClick={() => navigate("/addpackages")}
             disabled={!isOnline}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
               ${
@@ -128,15 +131,9 @@ export default function InternetPackages() {
             <tbody>
               {filteredPackages.map((pkg) => (
                 <tr key={pkg.id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium">
-                    {pkg.name}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {pkg.duration}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    {pkg.speed}
-                  </td>
+                  <td className="px-6 py-4 font-medium">{pkg.name}</td>
+                  <td className="px-6 py-4 text-center">{pkg.duration}</td>
+                  <td className="px-6 py-4 text-center">{pkg.speed}</td>
                   <td className="px-6 py-4 text-center font-semibold">
                     ${pkg.price}
                   </td>
@@ -152,21 +149,21 @@ export default function InternetPackages() {
                   <td className="px-6 py-4 text-center flex justify-center gap-3">
                     <button
                       disabled={!isOnline}
-                      className={`${
+                      className={
                         isOnline
                           ? "text-blue-600 hover:text-blue-800"
                           : "text-gray-400 cursor-not-allowed"
-                      }`}
+                      }
                     >
                       <Pencil size={16} />
                     </button>
                     <button
                       disabled={!isOnline}
-                      className={`${
+                      className={
                         isOnline
                           ? "text-red-600 hover:text-red-800"
                           : "text-gray-400 cursor-not-allowed"
-                      }`}
+                      }
                     >
                       <Trash2 size={16} />
                     </button>
@@ -175,60 +172,6 @@ export default function InternetPackages() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="grid gap-4 md:hidden">
-          {filteredPackages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className="bg-white rounded-xl shadow-sm p-4 space-y-3"
-            >
-              <div className="flex justify-between items-center">
-                <h2 className="font-semibold text-gray-800">
-                  {pkg.name}
-                </h2>
-                <span
-                  className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(
-                    pkg.status
-                  )}`}
-                >
-                  {pkg.status}
-                </span>
-              </div>
-
-              <p className="text-sm text-gray-600">
-                {pkg.duration} · {pkg.speed}
-              </p>
-
-              <p className="text-sm font-semibold">
-                ${pkg.price}
-              </p>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  disabled={!isOnline}
-                  className={`${
-                    isOnline
-                      ? "text-blue-600"
-                      : "text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  <Pencil size={16} />
-                </button>
-                <button
-                  disabled={!isOnline}
-                  className={`${
-                    isOnline
-                      ? "text-red-600"
-                      : "text-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Connection Status */}

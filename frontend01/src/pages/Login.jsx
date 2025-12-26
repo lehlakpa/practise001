@@ -17,6 +17,7 @@ function Login() {
             const res = await loginUser(form);
 
             if (res.data.success) {
+                localStorage.setItem("adminAuth", JSON.stringify(res.data));
                 setMessage("Login successful! Redirecting...");
                 setTimeout(() => navigate("/dashboard"), 1500);
             }

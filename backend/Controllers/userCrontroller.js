@@ -267,8 +267,8 @@ const adminupload = asyncHandler(async (req, res) => {
         throw new apiError(400, "All fields are required");
     }
 
-    if (price === undefined || price === null) {
-        throw new apiError(400, "Price is required");
+    if (price === undefined || price === null || isNaN(price)) {
+        throw new apiError(400, "Valid price is required");
     }
 
     // Validate images
@@ -285,7 +285,7 @@ const adminupload = asyncHandler(async (req, res) => {
         throw new apiError(500, "Failed to upload one or more images to Cloudinary");
     }
 
-    const adminuploads = await UploadImages.create({
+    const createdPackage = await UploadImages.create({
         title,
         description,
         price,
@@ -298,7 +298,7 @@ const adminupload = asyncHandler(async (req, res) => {
 
     return res
         .status(201)
-        .json(new ApiResponse(201, "Flash Sale created successfully", adminuploads));
+        .json(new ApiResponse(201, "Package created successfully", createdPackage));
 });
 
 

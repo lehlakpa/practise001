@@ -13,9 +13,12 @@ import Customers from "../srcadmin/PagesAdmin/AdminCustomers";
 import Orders from "../srcadmin/PagesAdmin/AdminOrders";
 import Settings from "../srcadmin/PagesAdmin/AdminSetting";
 import Profile from "./pages/Profile";
+import AddPackages from "../srcadmin/PagesAdmin/AddPackages";
+import { Toaster } from "react-hot-toast";
 function App() {
   return (
     <BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/profile" element={<Profile />} />
@@ -31,6 +34,7 @@ function App() {
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="/addpackages" element={<AddPackages />}/>
 
       </Routes>
     </BrowserRouter>
