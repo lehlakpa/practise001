@@ -24,7 +24,9 @@ function Home() {
 
       {/* Page Content */}
       <Header />
-      <BannerCarousel />
+      <div className="pt-20">
+        <BannerCarousel />
+      </div>
       <Packages />
       <Footer />
 

@@ -70,8 +70,11 @@ const createBooking = asyncHandler(async (req, res) => {
     try {
         const { plan, connectionType, fullName, phone, municipality, tole, paymentMethod } = req.body;
         // Validate required fields
-        if ([plan, connectionType, fullName, phone, municipality].some(field => !field || field.trim() === "")) {
+        if ([connectionType, fullName, phone, municipality].some(field => !field || field.trim() === "")) {
             throw new apiError(400, "All required fields must be filled");
+        }
+        if (!plan) {
+            throw new apiError(400, "Plan details are required");
         }
         const newBooking = await Booking.create({
             plan,

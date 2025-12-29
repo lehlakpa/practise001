@@ -12,7 +12,7 @@ export default function Header() {
     `;
 
   return (
-    <header className="w-full static bg-white shadow-md py-3 px-4 sm:px-6 flex items-center justify-between top-0 z-50">
+    <header className="w-full fixed bg-white shadow-md py-3 px-4 sm:px-6 flex items-center justify-between top-0 left-0 z-50">
 
       {/* Logo */}
       <div className="flex flex-col leading-tight">
@@ -34,7 +34,7 @@ export default function Header() {
           <Package className="w-5 h-5" /> More Packages
         </NavLink>
 
-        <NavLink to="/subscription" className={linkClass}>
+        <NavLink to="/tvpackages" className={linkClass}>
           <Tv className="w-5 h-5" /> TV Packages
         </NavLink>
 
@@ -83,7 +83,7 @@ export default function Header() {
         </NavLink>
 
         <NavLink
-          to="/subscription"
+          to="/tvpackages"
           className={linkClass}
           onClick={() => setMobileMenuOpen(false)}
         >

@@ -1,44 +1,10 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
-
-const subscriptionsData = [
-  {
-    id: 1,
-    fullName: "John Doe",
-    phone: "+1 987 654 3210",
-    connectionType: "Fiber",
-    package: "Basic Plan",
-    duration: "1 Month",
-    speed: "50 Mbps",
-    price: 25,
-    status: "Active",
-  },
-  {
-    id: 2,
-    fullName: "Jane Smith",
-    phone: "+1 555 123 4567",
-    connectionType: "Wireless",
-    package: "Standard Plan",
-    duration: "6 Months",
-    speed: "100 Mbps",
-    price: 120,
-    status: "Active",
-  },
-  {
-    id: 3,
-    fullName: "Michael Brown",
-    phone: "+1 444 987 6543",
-    connectionType: "DSL",
-    package: "Premium Plan",
-    duration: "1 Year",
-    speed: "200 Mbps",
-    price: 220,
-    status: "Inactive",
-  },
-];
+import axios from "axios";
 
 export default function InternetSubscriptions() {
+  const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -56,7 +22,27 @@ export default function InternetSubscriptions() {
     };
   }, []);
 
-  const filteredSubscriptions = subscriptionsData.filter(
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const auth = JSON.parse(localStorage.getItem("adminAuth"));
+        const token = auth?.accessToken || auth?.data?.accessToken;
+
+        const response = await axios.get("http://localhost:5000/api/v1/users/getbookings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setOrders(response.data.data);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      }
+    };
+
+    if (isOnline) {
+      fetchOrders();
+    }
+  }, [isOnline]);
+
+  const filteredSubscriptions = orders.filter(
     (item) =>
       item.fullName.toLowerCase().includes(search.toLowerCase()) ||
       item.phone.includes(search)
@@ -65,9 +51,14 @@ export default function InternetSubscriptions() {
   const statusStyle = (status) => {
     switch (status) {
       case "Active":
+      case "Confirmed":
+      case "Installed":
         return "bg-green-100 text-green-700";
       case "Inactive":
+      case "Cancelled":
         return "bg-gray-200 text-gray-600";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -90,7 +81,7 @@ export default function InternetSubscriptions() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-800">
-            Internet Subscriptions
+            Orders & Subscriptions
           </h1>
         </div>
 
@@ -119,7 +110,6 @@ export default function InternetSubscriptions() {
                 <th className="px-6 py-4 text-center">Connection</th>
                 <th className="px-6 py-4 text-center">Package</th>
                 <th className="px-6 py-4 text-center">Duration</th>
-                <th className="px-6 py-4 text-center">Speed</th>
                 <th className="px-6 py-4 text-center">Price</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-center">Actions</th>
@@ -128,7 +118,7 @@ export default function InternetSubscriptions() {
 
             <tbody>
               {filteredSubscriptions.map((item) => (
-                <tr key={item.id} className="border-t hover:bg-gray-50">
+                <tr key={item._id} className="border-t hover:bg-gray-50">
                   <td className="px-6 py-4 font-medium">
                     {item.fullName}
                   </td>
@@ -151,19 +141,15 @@ export default function InternetSubscriptions() {
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    {item.package}
+                    {item.plan?.title}
                   </td>
 
                   <td className="px-6 py-4 text-center">
-                    {item.duration}
-                  </td>
-
-                  <td className="px-6 py-4 text-center">
-                    {item.speed}
+                    {item.plan?.duration}
                   </td>
 
                   <td className="px-6 py-4 text-center font-semibold">
-                    ${item.price}
+                    Rs. {item.plan?.price}
                   </td>
 
                   <td className="px-6 py-4 text-center">
@@ -208,7 +194,7 @@ export default function InternetSubscriptions() {
         <div className="grid gap-4 lg:hidden">
           {filteredSubscriptions.map((item) => (
             <div
-              key={item.id}
+              key={item._id}
               className="bg-white rounded-xl shadow-sm p-4 space-y-2"
             >
               <div className="flex justify-between items-center">
@@ -239,15 +225,15 @@ export default function InternetSubscriptions() {
               </p>
 
               <p className="text-sm">
-                {item.connectionType} · {item.speed}
+                {item.connectionType}
               </p>
 
               <p className="text-sm">
-                {item.package} ({item.duration})
+                {item.plan?.title} ({item.plan?.duration})
               </p>
 
               <p className="font-semibold">
-                ${item.price}
+                Rs. {item.plan?.price}
               </p>
 
               <div className="flex gap-3 pt-2">

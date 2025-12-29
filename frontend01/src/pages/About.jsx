@@ -7,7 +7,7 @@ export default function AboutUs() {
     <div className="flex flex-col min-h-screen bg-gray-700">
       <Header />
 
-      <main className="relative flex-1 w-full px-4 sm:px-6 md:px-12 py-16 overflow-hidden">
+      <main className="relative flex-1 w-full px-4 sm:px-6 md:px-12 py-16 mt-20 overflow-hidden">
         {/* Decorative Background Shapes */}
         <div className="absolute top-0 left-0 w-40 h-40 sm:w-60 sm:h-60 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-0 w-56 h-56 sm:w-72 sm:h-72 bg-white/5 rounded-full blur-3xl"></div>

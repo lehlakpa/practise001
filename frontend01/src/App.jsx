@@ -15,6 +15,7 @@ import Settings from "../srcadmin/PagesAdmin/AdminSetting";
 import Profile from "./pages/Profile";
 import AddPackages from "../srcadmin/PagesAdmin/AddPackages";
 import { Toaster } from "react-hot-toast";
+import TvPackages from "./component/TvPackages";
 function App() {
   return (
     <BrowserRouter>
@@ -26,7 +27,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/ourpackages" element={<YearlyPackages />} />
-        <Route path="/subscription" element={<SubscriptionPackages/>}/>
+        <Route path="/tvpackages" element={<TvPackages/>}/>
         <Route path="order" element={<Details />} />
         <Route path="Dashboard" element={<AdminDashboard />} />
         <Route path="/thankyou" element={<ThankYou />} /> 

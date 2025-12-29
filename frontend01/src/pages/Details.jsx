@@ -1,246 +1,156 @@
 import React, { useState } from "react";
-import {
-  Wifi,
-  Loader2,
-  CheckCircle,
-  Home,
-  Building2,
-} from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { ArrowLeft, Check, CreditCard, MapPin, Phone, User, Wifi } from "lucide-react";
 import toast from "react-hot-toast";
-import { useNavigate, useLocation } from "react-router-dom";
-import Header from "../component/header";
 
-const OrderForm = () => {
-  const navigate = useNavigate();
+const Details = () => {
   const location = useLocation();
-  const plan = location.state?.product; // Internet plan
-
+  const navigate = useNavigate();
+  const { product } = location.state || {};
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    connectionType: "Home",
     fullName: "",
     phone: "",
-    district: "",
     municipality: "",
     tole: "",
+    connectionType: "Home",
     paymentMethod: "COD",
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!plan) {
-      toast.error("No internet plan selected");
-      return;
-    }
-
-    if (
-      !formData.fullName ||
-      !formData.phone ||
-      !formData.district ||
-      !formData.municipality
-    ) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    setLoading(true);
-
-    setTimeout(() => {
-      console.log("Internet Connection Request:", {
-        plan,
-        formData,
-      });
-
-      toast.success("Request submitted successfully!");
-      setLoading(false);
-      navigate("/thank-you");
-    }, 1000);
-  };
-
-
-  const resolveImageUrl = (item) =>
-    item?.image ||
-    item?.images?.[0]?.url ||
-    "https://via.placeholder.com/200x200?text=Internet+Plan";
-
-  if (!plan) {
+  if (!product) {
     return (
-      <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow text-center">
-          <p className="text-gray-600 mb-4">No internet plan selected</p>
-          <button
-            onClick={() => navigate("/")}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg"
-          >
-            Go Home
-          </button>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <p className="text-xl text-gray-600 mb-4">No package selected.</p>
+        <button
+          onClick={() => navigate("/")}
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Go Back Home
+        </button>
       </div>
     );
   }
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const payload = {
+        plan: {
+          title: product.title,
+          price: product.price,
+          description: product.description,
+          image: product.image,
+          duration: product.duration,
+          tvOptions: product.tvOptions || "Internet",
+        },
+        ...formData
+      };
+
+      await axios.post("http://localhost:5000/api/v1/users/bookings", payload);
+      toast.success("Booking placed successfully!");
+      navigate("/thankyou");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to place booking");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <Header />
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
+      <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <Wifi className="text-blue-600" size={28} />
-            <h2 className="text-2xl font-bold">
-              New Internet Connection Request
-            </h2>
+        {/* Left Side: Package Summary */}
+        <div className="bg-blue-600 text-white p-8 md:w-1/3 flex flex-col">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-blue-100 hover:text-white mb-6">
+            <ArrowLeft size={20} /> Back
+          </button>
+          <h2 className="text-2xl font-bold mb-4">Selected Plan</h2>
+          <div className="bg-blue-700/50 p-4 rounded-xl mb-6">
+            <h3 className="text-xl font-semibold">{product.title}</h3>
+            <p className="text-blue-100 mt-1">{product.duration}</p>
+            <p className="text-2xl font-bold mt-2">Rs. {product.price}</p>
+            <div className="mt-4 flex items-center gap-2 text-sm bg-blue-800/50 px-3 py-1 rounded-lg w-fit">
+              <Wifi size={16} /> {product.tvOptions === "TV" ? "TV Package" : "Internet Package"}
+            </div>
           </div>
+          <div className="mt-auto">
+            <p className="text-sm text-blue-200">Includes:</p>
+            <ul className="mt-2 space-y-2 text-sm">
+              <li className="flex items-center gap-2"><Check size={16} /> Free Installation</li>
+              <li className="flex items-center gap-2"><Check size={16} /> 24/7 Support</li>
+            </ul>
+          </div>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Plan Summary */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg">Selected Internet Plan</h3>
-
-              <div className="bg-gray-50 p-4 rounded-xl flex gap-4">
-                <img
-                  src={resolveImageUrl(plan)}
-                  alt={plan.title}
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
-
-                <div>
-                  <h4 className="font-semibold">{plan.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    {plan.description}
-                  </p>
-                  <p className="mt-2 font-bold text-blue-600">
-                    Rs. {plan.price} / month
-                  </p>
+        {/* Right Side: Booking Form */}
+        <div className="p-8 md:w-2/3">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Enter Your Details</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 text-gray-400" size={18} />
+                  <input required name="fullName" value={formData.fullName} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
                 </div>
               </div>
-
-              <div className="bg-blue-50 p-4 rounded-xl">
-                <div className="flex justify-between">
-                  <span>Monthly Charge:</span>
-                  <span className="font-bold text-blue-600">
-                    Rs. {plan.price}
-                  </span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 text-gray-400" size={18} />
+                  <input required name="phone" value={formData.phone} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="98XXXXXXXX" />
                 </div>
-                <p className="text-xs text-gray-600 mt-2">
-                  * Installation charges may apply separately
-                </p>
               </div>
             </div>
 
-            {/* Installation Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <h3 className="font-semibold text-lg">
-                Installation Address & Contact
-              </h3>
-
-              {/* Connection Type */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Connection Type *
-                </label>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="connectionType"
-                      value="Home"
-                      checked={formData.connectionType === "Home"}
-                      onChange={handleInputChange}
-                    />
-                    <Home size={18} /> Home
-                  </label>
-
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="connectionType"
-                      value="Office"
-                      checked={formData.connectionType === "Office"}
-                      onChange={handleInputChange}
-                    />
-                    <Building2 size={18} /> Office
-                  </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Municipality</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
+                  <input required name="municipality" value={formData.municipality} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Kathmandu" />
                 </div>
               </div>
-
-              <input
-                name="fullName"
-                placeholder="Full Name *"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <input
-                name="phone"
-                placeholder="Phone Number *"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  name="municipality"
-                  placeholder="Municipality *"
-                  value={formData.municipality}
-                  onChange={handleInputChange}
-                  className="border rounded-lg px-4 py-2"
-                />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tole / Area</label>
+                <input required name="tole" value={formData.tole} onChange={handleChange} className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Baneshwor" />
               </div>
+            </div>
 
-              <input
-                name="tole"
-                placeholder="Tole / Area / Landmark"
-                value={formData.tole}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <select
-                name="paymentMethod"
-                value={formData.paymentMethod}
-                onChange={handleInputChange}
-                className="w-full border rounded-lg px-4 py-2"
-              >
-                <option value="COD">Cash on Installation</option>
-                <option value="Khalti">Khalti</option>
-                <option value="Esewa">Esewa</option>
-                <option value="CreditCard">Credit Card</option>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Connection Type</label>
+              <select name="connectionType" value={formData.connectionType} onChange={handleChange} className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="Home">Home Connection</option>
+                <option value="Office">Office Connection</option>
               </select>
+            </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg flex justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Submitting Request...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle />
-                    Request Connection
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+              <select name="paymentMethod" value={formData.paymentMethod} onChange={handleChange} className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="COD">Cash on Delivery</option>
+                <option value="Khalti">Khalti Digital Wallet</option>
+                <option value="Esewa">eSewa Mobile Wallet</option>
+              </select>
+            </div>
+
+            <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition mt-4">
+              {loading ? "Processing..." : "Confirm Booking"}
+            </button>
+          </form>
         </div>
       </div>
     </div>
   );
 };
 
-export default OrderForm;
+export default Details;

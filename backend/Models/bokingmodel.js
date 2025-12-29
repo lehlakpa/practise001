@@ -13,6 +13,14 @@ const orderSchema = new mongoose.Schema(
                 type: Number,
                 required: true,
             },
+            duration: {
+                type: String,
+                required: true,
+            },
+            tvOptions: {
+                type: String,
+                required: true,
+            },
             image: String,
         },
 

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Header from "./header";
 
-export default function Packages() {
+export default function TvPackages() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
 
@@ -10,9 +11,9 @@ export default function Packages() {
     const fetchPackages = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/v1/users/packages");
-        // Filter packages where duration includes "1 month" (case-insensitive)
+        // Filter packages where tvOptions is "TV"
         const filteredPlans = response.data.data.filter((pkg) =>
-          pkg.duration?.toLowerCase().includes("1 month")
+          pkg.tvOptions === "TV"
         );
         setPlans(filteredPlans);
       } catch (error) {
@@ -41,9 +42,10 @@ export default function Packages() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <main className="w-full px-4 sm:px-6 md:px-12 py-12 bg-gray-100 flex-1">
+        <Header />
+      <main className="w-full px-4 sm:px-6 md:px-12 py-12 bg-gray-100 flex-1 pt-30">
         <h2 className="text-2xl sm:text-4xl font-bold text-center mb-10">
-          Our Internet Packages
+          Our TV Packages
         </h2>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
