@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { uploadImage } from "../Utils/cloudinaryupload.js";
 import { UploadImages } from "../Models/uploadmodel.js";
 import Booking from "../Models/bokingmodel.js";
+import cloudinary from "../config/cloudinaryconfig.js";
 
 const generatetokens = async (adminId) => {
     const user = await Admin.findById(adminId);
@@ -311,5 +312,79 @@ const getpackages= asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, "Packages fetched successfully", packages));
 });
 
+const deleteUpload = asyncHandler(async (req, res) => {
+    const upload = await UploadImages.findById(req.params.id);
 
-export { adminLogin,getpackages, adminupload,getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+    if (!upload) {
+        throw new apiError(404, "Upload not found");
+    }
+
+    // Delete images from Cloudinary first
+    if (upload.images?.length) {
+        const publicIds = upload.images
+            .filter(img => img.public_id)
+            .map(img => img.public_id);
+
+        if (publicIds.length) {
+            await cloudinary.api.delete_resources(publicIds);
+        }
+    }
+
+    // Now delete from MongoDB
+    await UploadImages.findByIdAndDelete(req.params.id);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Upload deleted successfully"));
+});
+
+const editUpload = asyncHandler(async (req, res) => {
+    const upload = await UploadImages.findById(req.params.id);
+
+    if (!upload) {
+        throw new apiError(404, "Upload not found");
+    }
+
+    // If new images are provided
+    if (req.files && req.files.images && req.files.images.length > 0) {
+
+        // Delete old images from Cloudinary
+        if (upload.images && upload.images.length > 0) {
+            const deletePromises = upload.images.map(image =>
+                image.public_id
+                    ? cloudinary.uploader.destroy(image.public_id)
+                    : Promise.resolve()
+            );
+
+            await Promise.all(deletePromises);
+        }
+
+        // Upload new images to Cloudinary
+        const uploadedImages = await Promise.all(
+            req.files.images.map((file) => uploadImage(file.path))
+        );
+
+        // Replace with new images
+        upload.images = uploadedImages.map((img) => ({
+            url: img.secure_url,
+            public_id: img.public_id,
+        }));
+    }
+
+    // Update other fields if needed
+    if (req.body.title) upload.title = req.body.title;
+    if (req.body.description) upload.description = req.body.description;
+    if (req.body.price) upload.price = req.body.price;
+    if (req.body.duration) upload.duration = req.body.duration;
+    if (req.body.tvOptions) upload.tvOptions = req.body.tvOptions;
+
+    await upload.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, upload, "Upload updated successfully")
+    );
+});
+
+
+
+export { deleteUpload,editUpload, adminLogin,getpackages, adminupload,getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };

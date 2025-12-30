@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminregister,getpackages, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin } from "../Controllers/userCrontroller.js";
+import { adminLogin, adminregister,editUpload,getpackages,deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin } from "../Controllers/userCrontroller.js";
 import { authMiddleware } from "../Middleware/authmiddleware.js";
 import { refreshaccesstoken } from "../Controllers/userCrontroller.js";
 import { upload } from "../Middleware/multer.middleware.js";
@@ -22,7 +22,15 @@ router.route("/upload").post(
     ]),
     authMiddleware,adminupload
 );
-
+router.route("/products/:id").delete(authMiddleware, deleteUpload);
+router.route("/products/:id").put(
+    upload.fields([
+        {
+            name: "images",
+            maxCount: 5
+        }
+    ]),
+    authMiddleware, editUpload);
 router.route("/bookings").post(createBooking);
 router.route("/getbookings").get(getBookings);
 router.route("/bookings/:id").delete(deleteBooking);

@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
+import toast from "react-hot-toast";
 
 export default function InternetPackages() {
   const [packages, setPackages] = useState([]);
@@ -42,6 +43,29 @@ export default function InternetPackages() {
   const filteredPackages = packages.filter((pkg) =>
     pkg.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this package?")) return;
+
+    try {
+      const auth = JSON.parse(localStorage.getItem("adminAuth"));
+      const token = auth?.accessToken || auth?.data?.accessToken;
+
+      await axios.delete(`http://localhost:5000/api/v1/users/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setPackages((prev) => prev.filter((pkg) => pkg._id !== id));
+      toast.success("Package deleted successfully");
+    } catch (error) {
+      console.error("Error deleting package:", error);
+      toast.error(error?.response?.data?.message || "Failed to delete package");
+    }
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/editpackage/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -117,6 +141,7 @@ export default function InternetPackages() {
                   </td>
                   <td className="px-6 py-4 text-center flex justify-center gap-3">
                     <button
+                      onClick={() => handleEdit(pkg._id)}
                       disabled={!isOnline}
                       className={
                         isOnline
@@ -127,6 +152,7 @@ export default function InternetPackages() {
                       <Pencil size={16} />
                     </button>
                     <button
+                      onClick={() => handleDelete(pkg._id)}
                       disabled={!isOnline}
                       className={
                         isOnline

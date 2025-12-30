@@ -36,6 +36,7 @@ function App() {
         <Route path="orders" element={<Orders />} />
         <Route path="settings" element={<Settings />} />
         <Route path="/addpackages" element={<AddPackages />}/>
+        <Route path="/editpackage/:id" element={<AddPackages />}/>
 
       </Routes>
     </BrowserRouter>

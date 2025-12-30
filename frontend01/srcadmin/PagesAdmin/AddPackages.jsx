@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 import {
     Upload,
     Loader2,
@@ -16,6 +17,9 @@ import toast from "react-hot-toast";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 
 const AddPackages = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -25,7 +29,32 @@ const AddPackages = () => {
     });
 
     const [images, setImages] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (id) {
+            const fetchPackage = async () => {
+                try {
+                    const { data } = await axios.get("http://localhost:5000/api/v1/users/packages");
+                    const pkg = data.data.find((p) => p._id === id);
+                    if (pkg) {
+                        setFormData({
+                            title: pkg.title,
+                            description: pkg.description,
+                            price: pkg.price,
+                            duration: pkg.duration,
+                            tvOptions: pkg.tvOptions || "Internet",
+                        });
+                        setExistingImages(pkg.images || []);
+                    }
+                } catch (error) {
+                    toast.error("Failed to load package details");
+                }
+            };
+            fetchPackage();
+        }
+    }, [id]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -46,7 +75,7 @@ const AddPackages = () => {
             return toast.error("All fields are required");
         }
 
-        if (images.length === 0) {
+        if (!id && images.length === 0) {
             return toast.error("Please upload at least one image");
         }
 
@@ -63,20 +92,29 @@ const AddPackages = () => {
             const token = auth?.accessToken || auth?.data?.accessToken;
             if (!token) return toast.error("Session expired. Please login again.");
 
-            await axios.post("http://localhost:5000/api/v1/users/upload", data, {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true,
-            });
+            if (id) {
+                await axios.put(`http://localhost:5000/api/v1/users/products/${id}`, data, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                });
+                toast.success("Package updated successfully!");
+                navigate("/products");
+            } else {
+                await axios.post("http://localhost:5000/api/v1/users/upload", data, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    withCredentials: true,
+                });
+                toast.success("Package created successfully!");
+                setFormData({
+                    title: "",
+                    description: "",
+                    price: "",
+                    duration: "",
+                    tvOptions: "Internet",
+                });
+                setImages([]);
+            }
 
-            toast.success("Package created successfully!");
-            setFormData({
-                title: "",
-                description: "",
-                price: "",
-                duration: "",
-                tvOptions: "Internet",
-            });
-            setImages([]);
         } catch (error) {
             toast.error(error?.response?.data?.message || "Failed to create package");
         } finally {
@@ -93,7 +131,7 @@ const AddPackages = () => {
                     {/* Header */}
                     <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center flex items-center justify-center gap-2">
                         <Package className="text-blue-600" />
-                        Add New Package
+                        {id ? "Edit Package" : "Add New Package"}
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -216,7 +254,7 @@ const AddPackages = () => {
                                 />
                             </label>
 
-                            {images.length > 0 && (
+                            {images.length > 0 ? (
                                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
                                     {images.map((img, index) => (
                                         <div key={index} className="relative group">
@@ -235,6 +273,20 @@ const AddPackages = () => {
                                         </div>
                                     ))}
                                 </div>
+                            ) : (
+                                existingImages.length > 0 && (
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-4">
+                                        {existingImages.map((img, index) => (
+                                            <div key={index} className="relative group">
+                                                <img
+                                                    src={img.url}
+                                                    alt="existing"
+                                                    className="h-24 w-full object-cover rounded-xl border-2 border-blue-100"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
                             )}
                         </div>
 
@@ -251,12 +303,12 @@ const AddPackages = () => {
                             {loading ? (
                                 <>
                                     <Loader2 className="animate-spin" />
-                                    Uploading...
+                                    Processing...
                                 </>
                             ) : (
                                 <>
                                     <Upload />
-                                    Create Package
+                                    {id ? "Update Package" : "Create Package"}
                                 </>
                             )}
                         </button>
