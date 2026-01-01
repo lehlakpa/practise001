@@ -100,14 +100,14 @@ const Details = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 text-gray-400" size={18} />
-                  <input required name="fullName" value={formData.fullName} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
+                  <input required name="fullName" value={formData.fullName} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter your FullName:" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 text-gray-400" size={18} />
-                  <input required name="phone" value={formData.phone} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="98XXXXXXXX" />
+                  <input required name="phone" value={formData.phone} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter your Phone Number: " />
                 </div>
               </div>
             </div>
@@ -117,12 +117,12 @@ const Details = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Municipality</label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-3 text-gray-400" size={18} />
-                  <input required name="municipality" value={formData.municipality} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Kathmandu" />
+                  <input required name="municipality" value={formData.municipality} onChange={handleChange} className="pl-10 w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter your Municipality:" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tole / Area</label>
-                <input required name="tole" value={formData.tole} onChange={handleChange} className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Baneshwor" />
+                <input required name="tole" value={formData.tole} onChange={handleChange} className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter your Tole / Area:" />
               </div>
             </div>
 

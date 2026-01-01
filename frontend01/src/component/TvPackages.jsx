@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "./header";
+import Footer from "./footer";
 
 export default function TvPackages() {
   const navigate = useNavigate();
@@ -80,6 +81,7 @@ export default function TvPackages() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

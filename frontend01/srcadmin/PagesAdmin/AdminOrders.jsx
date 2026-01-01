@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X } from "lucide-react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function InternetSubscriptions() {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [newStatus, setNewStatus] = useState("");
 
   // Internet connection detection
   useEffect(() => {
@@ -50,7 +53,6 @@ export default function InternetSubscriptions() {
 
   const statusStyle = (status) => {
     switch (status) {
-      case "Active":
       case "Confirmed":
       case "Installed":
         return "bg-green-100 text-green-700";
@@ -61,6 +63,33 @@ export default function InternetSubscriptions() {
         return "bg-yellow-100 text-yellow-700";
       default:
         return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const handleEdit = (order) => {
+    setEditingOrder(order);
+    setNewStatus(order.status);
+  };
+
+  const handleUpdateStatus = async () => {
+    try {
+      const auth = JSON.parse(localStorage.getItem("adminAuth"));
+      const token = auth?.accessToken || auth?.data?.accessToken;
+
+      await axios.put(`http://localhost:5000/api/v1/users/bookings/${editingOrder._id}`, 
+        { status: newStatus },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setOrders(orders.map((order) => 
+        order._id === editingOrder._id ? { ...order, status: newStatus, updatedAt: new Date().toISOString() } : order
+      ));
+      
+      toast.success("Status updated successfully");
+      setEditingOrder(null);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
     }
   };
 
@@ -81,7 +110,7 @@ export default function InternetSubscriptions() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <h1 className="text-2xl font-bold text-gray-800">
-            Orders & Subscriptions
+            Orders
           </h1>
         </div>
 
@@ -111,6 +140,8 @@ export default function InternetSubscriptions() {
                 <th className="px-6 py-4 text-center">Package</th>
                 <th className="px-6 py-4 text-center">Duration</th>
                 <th className="px-6 py-4 text-center">Price</th>
+                <th className="px-6 py-4 text-center">Ordered Date</th>
+                <th className="px-6 py-4 text-center">Updated Date</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
@@ -152,6 +183,14 @@ export default function InternetSubscriptions() {
                     Rs. {item.plan?.price}
                   </td>
 
+                  <td className="px-6 py-4 text-center text-gray-600">
+                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}
+                  </td>
+
+                  <td className="px-6 py-4 text-center text-gray-600">
+                    {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "-"}
+                  </td>
+
                   <td className="px-6 py-4 text-center">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(
@@ -164,6 +203,7 @@ export default function InternetSubscriptions() {
 
                   <td className="px-6 py-4 flex justify-center gap-3">
                     <button
+                      onClick={() => handleEdit(item)}
                       disabled={!isOnline}
                       className={`${
                         isOnline
@@ -236,8 +276,17 @@ export default function InternetSubscriptions() {
                 Rs. {item.plan?.price}
               </p>
 
+              <p className="text-sm text-gray-500">
+                Ordered: {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "-"}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                Updated: {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : "-"}
+              </p>
+
               <div className="flex gap-3 pt-2">
                 <button
+                  onClick={() => handleEdit(item)}
                   disabled={!isOnline}
                   className={`${
                     isOnline
@@ -261,6 +310,44 @@ export default function InternetSubscriptions() {
             </div>
           ))}
         </div>
+
+        {/* Edit Status Modal */}
+        {editingOrder && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+              <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="font-bold text-lg">Update Order Status</h3>
+                <button onClick={() => setEditingOrder(null)} className="text-gray-500 hover:text-gray-700">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Status</label>
+                  <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusStyle(editingOrder.status)}`}>
+                    {editingOrder.status}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+                  <select
+                    value={newStatus}
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    {["Pending", "Confirmed", "Active", "Installed", "Cancelled"].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+                <button onClick={() => setEditingOrder(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+                <button onClick={handleUpdateStatus} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Status</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Connection Status */}
         <p className="text-xs text-gray-500">
