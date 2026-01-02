@@ -51,18 +51,18 @@ const adminregister = asyncHandler(async (req, res) => {
         .json(new ApiResponse(201, "Admin registered successfully", createdAdmin));
 });
 const getAdmin = asyncHandler(async (req, res) => {
-  // Get admin details
-  const admin = await Admin.findById(req.user._id).select(
-    "-password -refreshToken"
-  );
+    // Get admin details
+    const admin = await Admin.findById(req.user._id).select(
+        "-password -refreshToken"
+    );
 
-  if (!admin) {
-    throw new ApiError(404, "Admin not found");
-  }
+    if (!admin) {
+        throw new ApiError(404, "Admin not found");
+    }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, "Admin fetched successfully", admin));
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Admin fetched successfully", admin));
 });
 
 
@@ -261,6 +261,44 @@ const adminChangepassword = asyncHandler(async (req, res) => {
     await user.save({ validateBeforeSave: false });
     return res.status(200).json(new ApiResponse(200, "Password changed successfully"));
 });
+const adminChangeUsername = asyncHandler(async (req, res) => {
+    const { username, fullName } = req.body;
+
+    if (!username || !fullName) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "All fields are required"));
+    }
+
+    const user = await Admin.findById(req.user._id);
+    if (!user) {
+        return res
+            .status(404)
+            .json(new ApiResponse(404, "Admin not found"));
+    }
+
+    // 🔒 Check if username already exists
+    const existingUser = await Admin.findOne({ username });
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Username already taken"));
+    }
+
+    user.username = username;
+    user.fullName = fullName;
+
+    await user.save(); // ✅ keep validations
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            _id: user._id,
+            username: user.username,
+            fullName: user.fullName,
+        }, "Profile updated successfully")
+    );
+});
+
 
 //admin upload sections 
 const adminupload = asyncHandler(async (req, res) => {
@@ -307,7 +345,7 @@ const adminupload = asyncHandler(async (req, res) => {
         .json(new ApiResponse(201, "Package created successfully", createdPackage));
 });
 
-const getpackages= asyncHandler(async (req, res) => {
+const getpackages = asyncHandler(async (req, res) => {
     const packages = await UploadImages.find().sort({ createdAt: -1 });
     return res.status(200).json(new ApiResponse(200, "Packages fetched successfully", packages));
 });
@@ -387,4 +425,4 @@ const editUpload = asyncHandler(async (req, res) => {
 
 
 
-export { deleteUpload,editUpload, adminLogin,getpackages, adminupload,getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+export { deleteUpload,adminChangeUsername, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
