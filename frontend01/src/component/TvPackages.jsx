@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "./header";
 import Footer from "./footer";
+import api from "../api/axios";
 
 export default function TvPackages() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function TvPackages() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/users/packages");
+        const response = await api.get("/api/v1/users/packages");
         // Filter packages where tvOptions is "TV"
         const filteredPlans = response.data.data.filter((pkg) =>
           pkg.tvOptions === "TV"

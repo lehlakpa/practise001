@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../api/axios";
 
 export default function Packages() {
   const navigate = useNavigate();
@@ -9,12 +10,8 @@ export default function Packages() {
   useEffect(() => {
     const fetchPackages = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/v1/users/packages");
-        // Filter packages where duration includes "1 month" (case-insensitive)
-        const filteredPlans = response.data.data.filter((pkg) =>
-          pkg.duration?.toLowerCase().includes("1 month")
-        );
-        setPlans(filteredPlans);
+        const response = await api.get("/api/v1/users/packages");
+        setPlans(response.data.data);
       } catch (error) {
         console.error("Error fetching packages:", error);
       }
