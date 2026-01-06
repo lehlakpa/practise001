@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { IndianRupee, ShoppingCart, Users, Package } from "lucide-react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 import DashboardCard from "../ComponentAdmin/DashBoardCard";
 import api from "../../src/api/api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [stats, setStats] = useState({
     revenue: 0,
     orders: 0,
@@ -43,7 +46,8 @@ export default function AdminDashboard() {
       } catch (error) {
         console.error("Failed to fetch dashboard stats:", error);
         if (error.response?.status === 401) {
-          window.location.href = "/";
+          setUser(null);
+          navigate("/login");
         }
       } finally {
         setLoading(false);
@@ -51,7 +55,7 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="flex min-h-screen bg-gray-100">

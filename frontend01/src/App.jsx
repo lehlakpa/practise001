@@ -15,6 +15,8 @@ import Settings from "../srcadmin/PagesAdmin/AdminSetting";
 import Profile from "./pages/Profile";
 import AddPackages from "../srcadmin/PagesAdmin/AddPackages";
 import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "../srcadmin/routes/ProtectedRoute";
+import PublicRoute from "../srcadmin/routes/PublicRoute";
 import TvPackages from "./component/TvPackages";
 function App() {
   return (
@@ -22,21 +24,27 @@ function App() {
       <Toaster position="top-center" reverseOrder={false} />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/ourpackages" element={<YearlyPackages />} />
         <Route path="/tvpackages" element={<TvPackages/>}/>
-        <Route path="order" element={<Details />} />
-        <Route path="Dashboard" element={<AdminDashboard />} />
         <Route path="/thankyou" element={<ThankYou />} /> 
+        
+        <Route element={<PublicRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
+
+        <Route element={<ProtectedRoute />}>
+        <Route path="order" element={<Details />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="customers" element={<Customers />} />
         <Route path="products" element={<Products />} />
         <Route path="orders" element={<Orders />} />
         <Route path="settings" element={<Settings />} />
         <Route path="/addpackages" element={<AddPackages />}/>
         <Route path="/editpackage/:id" element={<AddPackages />}/>
+        <Route path="/profile" element={<Profile />} />
+        </Route>
 
       </Routes>
     </BrowserRouter>

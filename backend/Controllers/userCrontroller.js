@@ -185,8 +185,8 @@ const adminLogin = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax"
     };
 
     return res
@@ -211,8 +211,9 @@ const adminLogout = asyncHandler(async (req, res) => {
     );
 
     const options = {
-        httpOnly: true, // only secure in prod
-        sameSite: "strict",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax"
     };
 
     return res
@@ -240,8 +241,8 @@ const refreshaccesstoken = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax"
     };
     return res
         .status(200)
@@ -350,6 +351,19 @@ const getpackages = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, "Packages fetched successfully", packages));
 });
 
+const getPackageById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const pkg = await UploadImages.findById(id);
+
+    if (!pkg) {
+        throw new apiError(404, "Package not found");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, pkg, "Package fetched successfully"));
+});
+
 const deleteUpload = asyncHandler(async (req, res) => {
     const upload = await UploadImages.findById(req.params.id);
 
@@ -425,4 +439,4 @@ const editUpload = asyncHandler(async (req, res) => {
 
 
 
-export { deleteUpload,adminChangeUsername, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+export { deleteUpload,adminChangeUsername, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };

@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 import toast from "react-hot-toast";
 import api from "../../src/api/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function InternetPackages() {
   const [packages, setPackages] = useState([]);
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   useEffect(() => {
     const fetchPackages = async () => {
@@ -17,7 +19,8 @@ export default function InternetPackages() {
         setPackages(response.data.data);
       } catch (error) {
         if (error.response?.status === 401) {
-          window.location.href = "/";
+          setUser(null);
+          navigate("/login");
         }
       }
     };

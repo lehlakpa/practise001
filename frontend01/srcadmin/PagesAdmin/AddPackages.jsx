@@ -15,11 +15,13 @@ import {
 } from "lucide-react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
 import api from "../../src/api/api";
+import { useAuth } from "../context/AuthContext";
 
 const AddPackages = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setUser } = useAuth();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -67,7 +69,8 @@ const AddPackages = () => {
         console.error("Error fetching package details:", err);
         toast.error("Failed to load package details");
         if (err.response?.status === 401) {
-          window.location.href = "/";
+          setUser(null);
+          navigate("/login");
         }
       }
     };
@@ -130,7 +133,8 @@ const AddPackages = () => {
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to save package");
       if (err.response?.status === 401) {
-        window.location.href = "/";
+        setUser(null);
+        navigate("/login");
       }
     } finally {
       setLoading(false);

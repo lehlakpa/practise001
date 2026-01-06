@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminregister,editUpload,getpackages,deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin } from "../Controllers/userCrontroller.js";
+import { adminLogin, adminregister,editUpload,getpackages,deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin, getPackageById } from "../Controllers/userCrontroller.js";
 import { authMiddleware } from "../Middleware/authmiddleware.js";
 import { refreshaccesstoken } from "../Controllers/userCrontroller.js";
 import { upload } from "../Middleware/multer.middleware.js";
@@ -25,21 +25,23 @@ router.route("/upload").post(
     ]),
     adminupload
 );
-router.route("/products/:id").delete(authMiddleware, deleteUpload);
-router.route("/products/:id").put(
-    authMiddleware,
-    upload.fields([
-        {
-            name: "images",
-            maxCount: 5
-        }
-    ]),
-    editUpload);
+
+router.route("/products/:id")
+    .get(getPackageById) // To fetch a single package for editing
+    .put(
+        authMiddleware,
+        upload.fields([{ name: "images", maxCount: 5 }]),
+        editUpload
+    )
+    .delete(authMiddleware, deleteUpload);
+
 router.route("/bookings").post(createBooking);
 router.route("/getbookings").get(authMiddleware, getBookings);
-router.route("/bookings/:id").delete(authMiddleware, deleteBooking);
-router.route("/bookings/:id").get(authMiddleware, getBookingById);
-router.route("/bookings/:id").put(authMiddleware, updateBooking);
+router.route("/bookings/:id")
+    .get(authMiddleware, getBookingById)
+    .put(authMiddleware, updateBooking)
+    .delete(authMiddleware, deleteBooking);
+
 router.route("/packages").get(getpackages);
 
 

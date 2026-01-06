@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
-import axios from "axios";
 import toast from "react-hot-toast";
 import api from "../../src/api/api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function InternetSubscriptions() {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [editingOrder, setEditingOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
@@ -34,7 +37,8 @@ export default function InternetSubscriptions() {
       } catch (error) {
         console.error("Error fetching orders:", error);
         if (error.response?.status === 401) {
-          window.location.href = "/";
+          setUser(null);
+          navigate("/login");
         }
       }
     };
@@ -42,7 +46,7 @@ export default function InternetSubscriptions() {
     if (isOnline) {
       fetchOrders();
     }
-  }, [isOnline]);
+  }, [isOnline, navigate]);
 
   const filteredSubscriptions = orders.filter(
     (item) =>
@@ -86,7 +90,8 @@ export default function InternetSubscriptions() {
       console.error("Error updating status:", error);
       toast.error("Failed to update status");
       if (error.response?.status === 401) {
-        window.location.href = "/";
+        setUser(null);
+        navigate("/login");
       }
     }
   };
