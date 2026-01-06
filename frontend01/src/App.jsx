@@ -30,8 +30,8 @@ function App() {
         <Route path="/thankyou" element={<ThankYou />} /> 
         
         <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>

@@ -2,39 +2,31 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../api/authService";
 import toast from "react-hot-toast";
+import { useAuth } from "../../srcadmin/context/AuthContext";
 
 function Login() {
     const [form, setForm] = useState({ username: "", password: "" });
-    const [message, setMessage] = useState("");
-    const [isSuccess, setIsSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setMessage("");
-        setIsSuccess(false);
 
         try {
             const res = await loginUser(form);
 
             if (res.data.success) {
                 localStorage.setItem("adminAuth", JSON.stringify(res.data));
-                toast.success("Login successful!");
-                setIsSuccess(true);
-                setMessage("Login successful! Redirecting...");
-                setTimeout(() => navigate("/dashboard"), 1500);
+                setUser(res.data.data.user);
+                navigate("/dashboard");
             } else {
                 toast.error(res.data.message || "Invalid credentials");
-                setIsSuccess(false);
-                setMessage(res.data.message || "Invalid credentials");
             }
         } catch (err) {
             console.error("Login failed:", err);
             toast.error(err.response?.data?.message || "Invalid credentials");
-            setIsSuccess(false);
-            setMessage(err.response?.data?.message || "Invalid credentials");
         } finally {
             setLoading(false);
         }
@@ -45,14 +37,6 @@ function Login() {
             <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md text-center">
 
               <h2 className="text-2xl font-bold text-indigo-700 mb-2">Login</h2>
-
-                {message && (
-                    <div className={`mb-4 p-3 rounded-lg border ${
-                        isSuccess ? "bg-green-100 text-green-700 border-green-300" : "bg-red-100 text-red-700 border-red-300"
-                    }`}>
-                        {message}
-                    </div>
-                )}
 
                 <div className="mb-4 text-left">
                     <label className="block text-gray-600 mb-1 font-medium">Username</label>

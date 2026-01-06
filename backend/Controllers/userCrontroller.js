@@ -436,7 +436,16 @@ const editUpload = asyncHandler(async (req, res) => {
         new ApiResponse(200, upload, "Upload updated successfully")
     );
 });
+const adminDashboard = asyncHandler(async (req, res) => {
+    // Example response for dashboard data
+    const dashboardData = { 
+        totalUsers: await Admin.countDocuments(),
+        totalBookings: await Booking.countDocuments(),
+        // Add more dashboard metrics as needed
+    };
+    return res.status(200).json(new ApiResponse(200, dashboardData, "Dashboard data fetched successfully"));
+});
 
 
 
-export { deleteUpload,adminChangeUsername, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+export { deleteUpload,adminChangeUsername,adminDashboard, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
