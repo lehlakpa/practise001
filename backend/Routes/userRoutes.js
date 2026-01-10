@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminregister,editUpload,getpackages,deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin, getPackageById, adminDashboard } from "../Controllers/userCrontroller.js";
+import { adminLogin, adminregister, AllAdmins, deactivateAdmin, deleteAdmin, editUpload, getpackages, deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin, getPackageById, adminDashboard } from "../Controllers/userCrontroller.js";
 import { authMiddleware } from "../Middleware/authmiddleware.js";
 import { refreshaccesstoken } from "../Controllers/userCrontroller.js";
 import { upload } from "../Middleware/multer.middleware.js";
@@ -9,6 +9,9 @@ const router = Router();
 router.route("/register").post(adminregister);
 router.route("/login").post(adminLogin);
 router.route("/getuser").get(authMiddleware, getAdmin);
+router.route("/alladmins").get(authMiddleware, AllAdmins);
+router.route("/admins/:id/deactivate").put(authMiddleware, deactivateAdmin);
+router.route("/admins/:id").delete(authMiddleware, deleteAdmin);
 // This would be a protected route in a real app
 router.route("/logout").post(authMiddleware, adminLogout);
 router.route("/refresh-token").post(refreshaccesstoken);

@@ -223,6 +223,56 @@ const adminLogout = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, "User logged out successfully", null));
 });
 
+const AllAdmins = asyncHandler(async (req, res) => {
+  const admins = await Admin.find().select("-password -refreshToken");
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      admins.length ? "Admins fetched successfully" : "No admins found",
+      admins
+    )
+  );
+});
+
+const deactivateAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const admin = await Admin.findById(id);
+
+  if (!admin) {
+    throw new apiError(404, "Admin not found");
+  }
+
+  // Toggle status
+  admin.status = admin.status === 'active' ? 'inactive' : 'active';
+  await admin.save();
+
+  return res.status(200).json(
+    new ApiResponse(200, `Admin ${admin.status === 'active' ? 'activated' : 'deactivated'} successfully`, admin)
+  );
+});
+
+const deleteAdmin = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const admin = await Admin.findById(id);
+
+  if (!admin) {
+    throw new apiError(404, "Admin not found");
+  }
+
+  // Prevent deleting self
+  if (admin._id.toString() === req.user._id.toString()) {
+    throw new apiError(400, "Cannot delete your own account");
+  }
+
+  await Admin.findByIdAndDelete(id);
+
+  return res.status(200).json(
+    new ApiResponse(200, "Admin deleted successfully")
+  );
+});
+
+
 const refreshaccesstoken = asyncHandler(async (req, res) => {
     const incomingrefreshToken = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "");
     if (!incomingrefreshToken) {
@@ -438,7 +488,7 @@ const editUpload = asyncHandler(async (req, res) => {
 });
 const adminDashboard = asyncHandler(async (req, res) => {
     // Example response for dashboard data
-    const dashboardData = { 
+    const dashboardData = {
         totalUsers: await Admin.countDocuments(),
         totalBookings: await Booking.countDocuments(),
         // Add more dashboard metrics as needed
@@ -448,4 +498,4 @@ const adminDashboard = asyncHandler(async (req, res) => {
 
 
 
-export { deleteUpload,adminChangeUsername,adminDashboard, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+export { deleteUpload,AllAdmins, deactivateAdmin, deleteAdmin, adminChangeUsername, adminDashboard, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };

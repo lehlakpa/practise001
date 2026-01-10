@@ -20,6 +20,11 @@ const adminSchema = new Schema({
         required: [true, "Password is required"],
 
     },
+    status: {
+        type: String,
+        enum: ['active', 'inactive'],
+        default: 'active'
+    },
     refreshToken: {
 
         type: String,

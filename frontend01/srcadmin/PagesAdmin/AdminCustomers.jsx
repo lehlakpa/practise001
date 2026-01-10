@@ -1,38 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminSidebar from "../ComponentAdmin/AdminSidebar";
-
-const customersData = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    orders: 12,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    orders: 4,
-    status: "Inactive",
-  },
-  {
-    id: 3,
-    name: "Michael Brown",
-    email: "michael@example.com",
-    orders: 9,
-    status: "Active",
-  },
-];
+import api from "../../src/api/api";
+import toast from "react-hot-toast";
 
 export default function Customers() {
   const [search, setSearch] = useState("");
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredCustomers = customersData.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(search.toLowerCase()) ||
-      customer.email.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const res = await api.get("/api/v1/users/alladmins");
+        setAdmins(res.data.data);
+      } catch (error) {
+        toast.error("Failed to fetch admins");
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdmins();
+  }, []);
+
+  const filteredAdmins = admins.filter(
+    (admin) =>
+      admin.fullname.toLowerCase().includes(search.toLowerCase()) ||
+      admin.username.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <AdminSidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -44,12 +51,12 @@ export default function Customers() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl font-bold text-gray-800">
-            Customers
+            Admins
           </h1>
 
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Search by name or username..."
             className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -62,45 +69,59 @@ export default function Customers() {
             <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
               <tr>
                 <th className="px-6 py-4 text-left">Name</th>
-                <th className="px-6 py-4 text-left">Email</th>
-                <th className="px-6 py-4 text-center">Orders</th>
+                <th className="px-6 py-4 text-left">Username</th>
                 <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredCustomers.length === 0 ? (
+              {filteredAdmins.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="text-center py-8 text-gray-500">
-                    No customers found
+                    No admins found
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
+                filteredAdmins.map((admin) => (
                   <tr
-                    key={customer.id}
+                    key={admin._id}
                     className="border-t hover:bg-gray-50 transition"
                   >
                     <td className="px-6 py-4 font-medium text-gray-800">
-                      {customer.name}
+                      {admin.fullname}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
-                      {customer.email}
+                      {admin.username}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {customer.orders}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold
-                          ${
-                            customer.status === "Active"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
-                          }`}
-                      >
-                        {customer.status}
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        admin.status === 'active'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {admin.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          onClick={() => handleDeactivate(admin._id)}
+                          className={`px-3 py-1 rounded text-xs font-medium ${
+                            admin.status === 'active'
+                              ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {admin.status === 'active' ? 'Deactivate' : 'Activate'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(admin._id)}
+                          className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -111,42 +132,51 @@ export default function Customers() {
 
         {/* Mobile Cards */}
         <div className="grid gap-4 md:hidden">
-          {filteredCustomers.length === 0 ? (
+          {filteredAdmins.length === 0 ? (
             <p className="text-center text-gray-500 py-8">
-              No customers found
+              No admins found
             </p>
           ) : (
-            filteredCustomers.map((customer) => (
+            filteredAdmins.map((admin) => (
               <div
-                key={customer.id}
-                className="bg-white rounded-xl shadow-sm p-4 space-y-2"
+                key={admin._id}
+                className="bg-white rounded-xl shadow-sm p-4 space-y-3"
               >
                 <div className="flex justify-between items-center">
                   <h2 className="font-semibold text-gray-800">
-                    {customer.name}
+                    {admin.fullname}
                   </h2>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold
-                      ${
-                        customer.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                  >
-                    {customer.status}
+                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                    admin.status === 'active'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}>
+                    {admin.status === 'active' ? 'Active' : 'Inactive'}
                   </span>
                 </div>
 
                 <p className="text-sm text-gray-600">
-                  {customer.email}
+                  {admin.username}
                 </p>
 
-                <p className="text-sm text-gray-500">
-                  Orders:{" "}
-                  <span className="font-medium text-gray-800">
-                    {customer.orders}
-                  </span>
-                </p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => handleDeactivate(admin._id)}
+                    className={`px-3 py-1 rounded text-xs font-medium ${
+                      admin.status === 'active'
+                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    }`}
+                  >
+                    {admin.status === 'active' ? 'Deactivate' : 'Activate'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(admin._id)}
+                    className="px-3 py-1 rounded text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))
           )}
