@@ -120,7 +120,7 @@ export default function InternetSubscriptions() {
         />
 
         {/* Desktop Table */}
-        <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="hidden md:block bg-white rounded-xl shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
               <tr>
