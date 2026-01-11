@@ -11,6 +11,7 @@ export default function InternetSubscriptions() {
   const [search, setSearch] = useState("");
   const [editingOrder, setEditingOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
+  const [reasons, setReasons] = useState("");
 
   const navigate = useNavigate();
   const { setUser } = useAuth();
@@ -59,13 +60,17 @@ export default function InternetSubscriptions() {
   const handleEdit = (order) => {
     setEditingOrder(order);
     setNewStatus(order.status);
+    setReasons(order.note || "");
   };
 
   const handleUpdateStatus = async () => {
     try {
-      await api.put(`/api/v1/users/bookings/${editingOrder._id}`, {
+      const payload = {
         status: newStatus,
-      });
+        note: reasons.trim()
+      };
+
+      await api.put(`/api/v1/users/bookings/${editingOrder._id}`, payload);
 
       setOrders((prev) =>
         prev.map((order) =>
@@ -73,6 +78,7 @@ export default function InternetSubscriptions() {
             ? {
                 ...order,
                 status: newStatus,
+                note: reasons.trim(),
                 updatedAt: new Date().toISOString(),
               }
             : order
@@ -128,6 +134,7 @@ export default function InternetSubscriptions() {
                 <th className="px-6 py-4 text-center">Ordered Date</th>
                 <th className="px-6 py-4 text-center">Updated Date</th>
                 <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-6 py-4 text-center">Reasons</th>
                 <th className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
@@ -188,6 +195,10 @@ export default function InternetSubscriptions() {
                     >
                       {item.status}
                     </span>
+                  </td>
+
+                  <td className="px-6 py-4 text-center text-gray-600">
+                    {item.note || "-"}
                   </td>
 
                   <td className="px-6 py-4 flex justify-center gap-3">
@@ -267,6 +278,12 @@ export default function InternetSubscriptions() {
                   : "-"}
               </p>
 
+              {item.note && (
+                <p className="text-sm text-gray-500">
+                  Note: {item.note}
+                </p>
+              )}
+
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => handleEdit(item)}
@@ -328,6 +345,19 @@ export default function InternetSubscriptions() {
                       )
                     )}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reasons
+                  </label>
+                  <textarea
+                    value={reasons}
+                    onChange={(e) => setReasons(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                    rows="3"
+                    placeholder="Add any reasons about this order..."
+                  />
                 </div>
               </div>
 

@@ -24,6 +24,36 @@ export default function Customers() {
     fetchAdmins();
   }, []);
 
+const handleDeactivate = async (id) => {
+  try {
+    const { data } = await api.put(`/api/v1/users/admins/${id}/deactivate`);
+    toast.success(data?.message || "Status updated");
+
+    setAdmins((prev) =>
+      prev.map((admin) =>
+        admin._id === id ? data.data : admin
+      )
+    );
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    toast.error(error.response?.data?.message || "Failed to update status");
+  }
+};
+
+const handleDelete = async (id) => {
+  if (!window.confirm("Are you sure you want to delete this admin?")) return;
+
+  try {
+    const { data } = await api.delete(`/api/v1/users/admins/${id}`);
+    toast.success(data?.message || "Admin deleted successfully");
+
+    setAdmins((prev) => prev.filter((admin) => admin._id !== id));
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    toast.error(error.response?.data?.message || "Failed to delete admin");
+  }
+};
+
   const filteredAdmins = admins.filter(
     (admin) =>
       admin.fullname.toLowerCase().includes(search.toLowerCase()) ||

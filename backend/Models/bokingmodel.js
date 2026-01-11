@@ -65,6 +65,12 @@ const orderSchema = new mongoose.Schema(
             enum: ["Pending", "Confirmed", "Installed", "Cancelled"],
             default: "Pending",
         },
+
+        // Admin Note
+        note: {
+            type: String,
+            trim: true,
+        },
     },
     {
         timestamps: true, // createdAt & updatedAt

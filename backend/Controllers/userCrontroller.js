@@ -120,7 +120,7 @@ const getBookingById = asyncHandler(async (req, res) => {
 
 const updateBooking = asyncHandler(async (req, res) => {
     try {
-        const status = req.body.status;
+        const { status, cancellationReason, note } = req.body;
         const allowedStatus = [
             "Pending",
             "Confirmed",
@@ -133,9 +133,24 @@ const updateBooking = asyncHandler(async (req, res) => {
                 message: "Invalid order status",
             });
         }
+
+        const updateData = { status };
+
+        if (status === "Cancelled" && !cancellationReason) {
+            throw new apiError(400, "Cancellation reason is required");
+        }
+
+        if (cancellationReason !== undefined) {
+            updateData.cancellationReason = cancellationReason;
+        }
+
+        if (note !== undefined) {
+            updateData.note = note;
+        }
+
         const book = await Booking.findByIdAndUpdate(
             req.params.id,
-            { status },
+            updateData,
             { new: true }
         );
         if (!book) {
@@ -178,6 +193,10 @@ const adminLogin = asyncHandler(async (req, res) => {
 
     if (!isPasswordValid) {
         throw new apiError(401, "Invalid username or password");
+    }
+
+    if (admincheck.status === "inactive") {
+        throw new apiError(403, "Account is inactive. Please contact administrator.");
     }
 
     const { accessToken, refreshToken } = await generatetokens(admincheck._id);
@@ -284,6 +303,10 @@ const refreshaccesstoken = asyncHandler(async (req, res) => {
     if (!user) {
         throw new apiError(401, "Invalid Refresh Token");
     }
+    if (user.status === "inactive") {
+        throw new apiError(403, "Account is inactive.");
+    }
+
     if (user.refreshToken !== incomingrefreshToken) {
         throw new apiError(401, "Refresh token is expired or used!");
     }
