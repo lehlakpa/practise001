@@ -7,6 +7,8 @@ import { uploadImage } from "../Utils/cloudinaryupload.js";
 import { UploadImages } from "../Models/uploadmodel.js";
 import Booking from "../Models/bokingmodel.js";
 import cloudinary from "../config/cloudinaryconfig.js";
+import crypto from "crypto";
+import { Refferral } from "../Models/refferalmodel.js";
 
 const generatetokens = async (adminId) => {
     const user = await Admin.findById(adminId);
@@ -419,6 +421,32 @@ const adminupload = asyncHandler(async (req, res) => {
         .json(new ApiResponse(201, "Package created successfully", createdPackage));
 });
 
+const Refferal=asyncHandler(async(req,res)=>{
+    const {customerId,name,phonenumber}=req.body;
+    
+    if(!customerId || !name || !phonenumber){
+        throw new apiError(400,"All fields are required");
+    }
+    const generateRefferalCode=(length=6)=>{
+        const characters='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result='';
+        const charactersLength=characters.length;
+        for(let i=0;i<length;i++){
+            result+=characters.charAt(Math.floor(Math.random()*charactersLength));
+        }
+        return result;
+    }
+    const refferalCode=generateRefferalCode(8);
+
+    const newrefferal=await Refferral.create({
+        customerId,
+        name,
+        phonenumber,
+        refferalCode,
+    });
+    return res.status(201).json(new ApiResponse(201,"Refferal created successfully",newrefferal));
+}); 
+
 const getpackages = asyncHandler(async (req, res) => {
     const packages = await UploadImages.find().sort({ createdAt: -1 });
     return res.status(200).json(new ApiResponse(200, "Packages fetched successfully", packages));
@@ -521,4 +549,6 @@ const adminDashboard = asyncHandler(async (req, res) => {
 
 
 
-export { deleteUpload,AllAdmins, deactivateAdmin, deleteAdmin, adminChangeUsername, adminDashboard, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };
+
+
+export { deleteUpload,AllAdmins,Refferal, deactivateAdmin, deleteAdmin, adminChangeUsername, adminDashboard, getPackageById, editUpload, adminLogin, getpackages, adminupload, getAdmin, adminChangepassword, adminregister, adminLogout, refreshaccesstoken, getBookings, getBookingById, updateBooking, deleteBooking, createBooking };

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { adminLogin, adminregister, AllAdmins, deactivateAdmin, deleteAdmin, editUpload, getpackages, deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin, getPackageById, adminDashboard } from "../Controllers/userCrontroller.js";
+import { adminLogin, adminregister, AllAdmins, deactivateAdmin, deleteAdmin, editUpload, getpackages, deleteUpload, adminLogout, deleteBooking, updateBooking, adminupload, adminChangepassword, getBookings, getBookingById, createBooking, getAdmin, getPackageById, adminDashboard, Refferal } from "../Controllers/userCrontroller.js";
 import { authMiddleware } from "../Middleware/authmiddleware.js";
 import { refreshaccesstoken } from "../Controllers/userCrontroller.js";
 import { upload } from "../Middleware/multer.middleware.js";
@@ -47,6 +47,7 @@ router.route("/bookings/:id")
     .delete(authMiddleware, deleteBooking);
 
 router.route("/packages").get(getpackages);
+router.route("/refferal").post(Refferal);
 
 
 export default router;
