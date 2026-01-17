@@ -10,7 +10,7 @@ const refferalSchema = new mongoose.Schema({
     },
     phonenumber: {
         type: String,
-    
+
     },
     refferalCode:{
         type: String,

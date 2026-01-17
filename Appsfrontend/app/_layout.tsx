@@ -1,48 +1,17 @@
-import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import "./styles/global.css";
+import { Stack  } from "expo-router";
+import { useFonts } from "expo-font";
+import { ActivityIndicator } from "react-native";
 
-export default function RootLayout() {
+export default function Layout() {
+  const [fontsLoaded] = useFonts({
+    'Inter-Black': require('../assets/font/Montserrat-Black.ttf'),
+    'Inter-Bold': require('../assets/font/Montserrat-BlackItalic.ttf'),
+   });
+
+  if (!fontsLoaded) {
+    return <ActivityIndicator />; // or a loading spinner
+  }
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#22c55e",
-        tabBarStyle: {
-          height: 60,
-          paddingBottom: 6,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+    <Stack />
   );
 }

@@ -1,15 +1,24 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
+import { useEffect } from "react";
 
 export default function OnboardingScreen() {
+  const navigation = useNavigation();
+
+  useEffect(()=>{
+    navigation.setOptions({headerShown:false});
+  });
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#E9F5C9" }}>
+    <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center",backgroundColor: "#E9F5C9" }}>
       <StatusBar style="dark" />
 
-      <View className="flex-1 items-center justify-between px-6 py-10">
+      <View style={{ flex: 1, backgroundColor: "#E9F5C9" }}>
         {/* Logo / Title */}
-        <Text className="text-3xl font-extrabold text-green-900">
+        <Text style={{ fontSize: 50, textAlign: "center",fontFamily: "Inter-Bold", color: "#166534" }}>
           Bito
         </Text>
 
@@ -23,12 +32,12 @@ export default function OnboardingScreen() {
         />
 
         {/* Text Content */}
-        <View className="items-center">
-          <Text className="text-xl font-bold text-gray-900 text-center">
+        <View style={{ alignItems: "center", marginBottom: 20 }}>
+          <Text style={{ fontFamily: "Inter-Bold", fontSize: 22, color: "#166534", textAlign: "center" }}>
             Track calories daily, reach{"\n"}your health goals
           </Text>
 
-          <Text className="text-sm text-gray-600 text-center mt-3 px-4">
+          <Text style={{ fontFamily: "Inter-Regular" , fontSize: 16, color: "#166534", textAlign: "center", marginTop: 10, lineHeight: 22 }}>
             This app simplifies nutrition and makes healthy
             living truly achievable.
           </Text>
@@ -38,10 +47,11 @@ export default function OnboardingScreen() {
         <TouchableOpacity
           activeOpacity={0.85}
           className="w-full py-4 rounded-full bg-lime-400"
+          onPress={() => router.replace("/(tabs)/home")}
         >
-          <Text className="text-center text-base font-bold text-green-900">
-            Get Ready
-          </Text>
+         <Text style={{ fontFamily:"Inter-Bold", color: "#ffffff", fontSize: 16, textAlign: "center" }}>
+          Get Started
+         </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
