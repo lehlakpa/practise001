@@ -1,9 +1,12 @@
 import React from 'react'
+import { View, Text } from 'react-native'
 
-function home() {
+function Home() {
   return (
-    <div>home</div>
+    <View>
+      <Text>home</Text>
+    </View>
   )
 }
 
-export default home
+export default Home

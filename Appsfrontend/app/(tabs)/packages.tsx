@@ -1,12 +1,12 @@
 import React from 'react'
 import { View, Text } from 'react-native'
 
-function Explore() {
+function Packages() {
   return (
     <View>
-      <Text>explore</Text>
+      <Text>this packages</Text>
     </View>
   )
 }
 
-export default Explore
+export default Packages
